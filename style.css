@@ -1,0 +1,11 @@
+.button {
+  margin: 5px;
+  border: 2px solid black;
+  border-radius: 7px;
+  font-size: 28px;
+  font-family: sans-serif;
+  outline: none;
+  padding: 5px 8px;
+  cursor: pointer;
+  display: block;
+}
