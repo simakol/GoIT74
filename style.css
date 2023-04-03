@@ -1,0 +1,29 @@
+body {
+  text-align: center;
+  font-family: sans-serif;
+  height: 200vh;
+}
+
+p {
+  font-size: 60px;
+  margin-top: 0px;
+}
+
+button {
+  font-size: 40px;
+  background-color: rgb(219, 77, 77);
+  color: white;
+  border-radius: 15px;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button.start {
+  background-color: rgb(105, 219, 77);
+}
+
+button:disabled {
+  background-color: rgb(197, 199, 197);
+  cursor: not-allowed;
+}
