@@ -1,33 +1,59 @@
-// **Написати додаток пошуку новин**
-// Користувач бачить на екрані інпут ⇒ вводить в нього запит ⇒ отримує на екрані підбірку новин по його запиту.
-
-import { getNews } from "./api.js";
+import NewsApiService from "./NewsApiService.js";
+import LoadMoreBtn from "./components/LoadMoreBtn.js";
 
 const refs = {
   form: document.getElementById("form"),
   newsWrapper: document.getElementById("newsWrapper"),
 };
 
+const newsApiService = new NewsApiService();
+const loadMoreBtn = new LoadMoreBtn({
+  selector: "#loadMore",
+  isHidden: true,
+});
+
 refs.form.addEventListener("submit", onSubmit);
+loadMoreBtn.button.addEventListener("click", fetchArticles);
+// function handleScroll() {
+//   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+//   console.log(scrollTop, scrollHeight, clientHeight);
+//   if (scrollTop + clientHeight >= scrollHeight - 5) {
+//     fetchArticles();
+//   }
+// }
+
+// window.addEventListener("scroll", handleScroll);
 
 function onSubmit(e) {
   e.preventDefault();
+  loadMoreBtn.show();
   const form = e.currentTarget;
-  const inputValue = form.elements.news.value;
-  getNews(inputValue)
-    .then(({ articles }) => {
-      console.log(articles);
-      if (articles.length === 0) throw new Error("No data!");
+  newsApiService.query = form.elements.news.value;
 
-      const markup = articles.reduce(
-        (markup, article) => markup + createMarkup(article),
-        ""
-      );
+  newsApiService.resetPage();
+  clearNewsList();
+  fetchArticles().finally(() => form.reset());
+}
+
+function fetchArticles() {
+  loadMoreBtn.disable();
+  return getArticlesMarkup()
+    .then((markup) => {
       updateNewsList(markup);
+      loadMoreBtn.enable();
     })
-    // .catch((err) => onError(err))
-    .catch(onError)
-    .finally(() => form.reset());
+    .catch(onError);
+}
+
+function getArticlesMarkup() {
+  return newsApiService.getNews().then(({ articles }) => {
+    if (articles.length === 0) throw new Error("No data!");
+    return articles.reduce(
+      (markup, article) => markup + createMarkup(article),
+      ""
+    );
+  });
 }
 
 function createMarkup({ title, author, url, urlToImage, description }) {
@@ -46,31 +72,25 @@ function createMarkup({ title, author, url, urlToImage, description }) {
 }
 
 function updateNewsList(markup) {
-  refs.newsWrapper.innerHTML = markup;
+  refs.newsWrapper.insertAdjacentHTML("beforeend", markup);
+}
+
+function clearNewsList() {
+  refs.newsWrapper.innerHTML = "";
 }
 
 function onError(err) {
   console.error(err);
+  loadMoreBtn.hide();
+  clearNewsList();
   updateNewsList("<p>Not found!</p>");
 }
 
-
-
 /*
-* CRUD - create read update delete
-
-- POST - create
-- створює новий ресурс
-- при створенні ресурсу, сервер автоматично дасть йому ID
-- цей метод не є ідемпотентим
-
-/user
-
-- PUT - update
-- оновлює вже існуючий ресурс, або створює його, якщо на сервері такого не існує
-- є ідемпотентним
-
-/user/{id}
-
-
+  1. Користувач робить запит
+  2. Показується 5 перших результатів
+  3. Знизу зʼявляється кнопка "Завантажити більше"
+  4. Натискає на кнопку
+  5. Відбувається новий запит на сервер і підвантажується 5 нових обʼєктів
+  6. 5 нових результатів додаються до решти
 */
