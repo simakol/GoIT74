@@ -1,11 +1,7 @@
-import { save, load } from "./storage.js";
-
-const STORAGE_KEY = "tasks";
+import { saveTask, loadTasks, deleteTask, updateTask } from "./api.js";
 
 const myInput = document.getElementById("myInput");
 const myUL = document.getElementById("myUL");
-
-let currentId = 0;
 
 function addCloseButton(target) {
   const span = document.createElement("span");
@@ -22,11 +18,10 @@ function addNewTask() {
     alert("Введіть текст!");
     return;
   }
-  createLi(task);
-  addTaskToStorage(task);
+  addTaskToDB(task);
 }
 
-function createLi(text, isDone = false, id = currentId) {
+function createLi({ text, isDone = false, id }) {
   const liEl = document.createElement("li");
   liEl.textContent = text;
   liEl.dataset.id = id;
@@ -36,59 +31,29 @@ function createLi(text, isDone = false, id = currentId) {
 }
 
 function handleTaskBehaviour({ target }) {
-  const currentState = load(STORAGE_KEY);
   if (target.nodeName === "LI") {
     target.classList.toggle("checked");
-    const taskIndex = currentState.findIndex(
-      (task) => Number(task.id) === Number(target.dataset.id)
-    );
-    currentState[taskIndex].isDone = !currentState[taskIndex].isDone;
+    updateTask(target.dataset.id, target.classList.contains("checked"));
   } else if (target.classList.contains("close")) {
     target.parentNode.remove();
-    const taskIndex = currentState.findIndex(
-      (task) => Number(task.id) === Number(target.parentNode.dataset.id)
-    );
-    currentState.splice(taskIndex, 1);
+    deleteTask(target.parentNode.dataset.id);
   }
-  save(STORAGE_KEY, currentState);
 }
 
-function createTaskObj(text, isDone) {
-  return {
-    text,
-    isDone,
-    id: currentId,
-  };
-}
-
-function addTaskToStorage(text, isDone = false) {
-  const currentState = load(STORAGE_KEY);
-  if (currentState === undefined) {
-    //створюємо масив і додаємо туди перший обʼєкт задачі
-    const arr = [createTaskObj(text, isDone)];
-    save(STORAGE_KEY, arr);
-  } else {
-    // до вже існуючого масиву додати новий обʼєкт задачі
-    currentState.push(createTaskObj(text, isDone));
-    save(STORAGE_KEY, currentState);
-  }
-  currentId += 1;
+function addTaskToDB(text) {
+  saveTask({ text })
+    // .then((res) => res.json())
+    .then(({ data }) => {
+      createLi(data);
+    });
 }
 
 function fillTasksList() {
-  const currentState = load(STORAGE_KEY);
-
-  if (currentState !== undefined) {
-    console.log(currentState, currentId);
-    currentState.forEach(({ text, isDone, id }) => {
-      createLi(text, isDone, id);
-      currentId = id + 1;
+  loadTasks().then((tasks) => {
+    tasks.forEach((task) => {
+      createLi(task);
     });
-    // currentId =
-    //   currentState.length === 0
-    //     ? 0
-    //     : currentState[currentState.length - 1].id + 1;
-  }
+  });
 }
 
 export { addNewTask, handleTaskBehaviour, fillTasksList };
