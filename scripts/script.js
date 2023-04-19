@@ -36,24 +36,44 @@ function onSubmit(e) {
   fetchArticles().finally(() => form.reset());
 }
 
-function fetchArticles() {
+async function fetchArticles() {
+  // loadMoreBtn.disable();
+  // return getArticlesMarkup()
+  //   .then((markup) => {
+  //     updateNewsList(markup);
+  //     loadMoreBtn.enable();
+  //   })
+  //   .catch(onError);
+
   loadMoreBtn.disable();
-  return getArticlesMarkup()
-    .then((markup) => {
-      updateNewsList(markup);
-      loadMoreBtn.enable();
-    })
-    .catch(onError);
+
+  try {
+    const markup = await getArticlesMarkup();
+    updateNewsList(markup);
+    loadMoreBtn.enable();
+  } catch (err) {
+    onError(err);
+  }
 }
 
-function getArticlesMarkup() {
-  return newsApiService.getNews().then(({ articles }) => {
+async function getArticlesMarkup() {
+  // return newsApiService.getNews().then(({ articles }) => {
+  //   if (articles.length === 0) throw new Error("No data!");
+  //   return articles.reduce(
+  //     (markup, article) => markup + createMarkup(article),
+  //     ""
+  //   );
+  // });
+  try {
+    const { articles } = await newsApiService.getNews();
     if (articles.length === 0) throw new Error("No data!");
     return articles.reduce(
       (markup, article) => markup + createMarkup(article),
       ""
     );
-  });
+  } catch (err) {
+    onError(err);
+  }
 }
 
 function createMarkup({ title, author, url, urlToImage, description }) {
@@ -72,7 +92,8 @@ function createMarkup({ title, author, url, urlToImage, description }) {
 }
 
 function updateNewsList(markup) {
-  refs.newsWrapper.insertAdjacentHTML("beforeend", markup);
+  if (markup !== undefined)
+    refs.newsWrapper.insertAdjacentHTML("beforeend", markup);
 }
 
 function clearNewsList() {
@@ -85,12 +106,3 @@ function onError(err) {
   clearNewsList();
   updateNewsList("<p>Not found!</p>");
 }
-
-/*
-  1. Користувач робить запит
-  2. Показується 5 перших результатів
-  3. Знизу зʼявляється кнопка "Завантажити більше"
-  4. Натискає на кнопку
-  5. Відбувається новий запит на сервер і підвантажується 5 нових обʼєктів
-  6. 5 нових результатів додаються до решти
-*/

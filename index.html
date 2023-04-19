@@ -17,7 +17,94 @@
 
     <button type="button" id="loadMore">Load more</button>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="scripts/script.js" type="module"></script>
+    <script>
+        // const getPosts = async () => {
+        //     const url = 'https://jsonplaceholder.typicode.com/posts/1'
+        //     const res = await fetch(url)
+        //     const json = await res.json()
+        //     console.log(json)
+        // }
+
+        // function getStone(stoneName) {
+        //     const stones = {
+        //         "Смарагд": {
+        //             price: 1300,
+        //             quantity: 4
+        //         },
+        //         "Діамант": {
+        //             price: 2700,
+        //             quantity: 3
+        //         },
+        //         "Сапфір": {
+        //             price: 400,
+        //             quantity: 7
+        //         },
+        //         "Щебінь": {
+        //             price: 200,
+        //             quantity: 2
+        //         }
+        //     }
+
+        //     return new Promise(res => setTimeout(() => res(stones[stoneName]), 1500))
+        // }
+
+        // function getSeveralStones() {
+        //     getStone("Щебінь").then(result => {
+        //         console.log(result)
+        //         getStone("Діамант").then(console.log)
+        //     })
+        // }
+
+        // getSeveralStones()
+
+        //async/await - імітація синхронності у асинхронному коді
+        // async function getSeveralStonesAsync() {
+        //     //послідовні
+        //     // const scree = await getStone("Щебінь");
+        //     // console.log(scree)
+        //     // const diamond = await getStone("Діамант")
+        //     // console.log(diamond)
+
+        //     //паралельні
+        //     const scree = getStone("Щебінь");
+        //     const diamond = getStone("Діамант")
+        //     const stones = await Promise.all([scree, diamond])
+        //     console.log(stones)
+        // }
+
+        // getSeveralStonesAsync()
+
+        /*
+            1. ключове слово await можна використовувати ТІЛЬКИ всередині async функції
+            2. оператор await заморожує асинхронну функцію і чекає поки проміс перейде в стан Fullfilled або Rejected(якщо Fullfilled - повертає результат виконання промісу, якщо Rejected - викидує помилку)
+            3. await повертає не проміс, а його результат
+            4. асинхронна функція(async) завжди повертає проміс
+        */
+
+        async function fetchUsers() {
+            const baseUrl = "https://jsonplaceholder.typicode.com";
+            const userIds = [1, 2, 3, 4, 5];
+
+            // for (const userId of userIds) {
+            //     await fetch(`${baseUrl}/users/${userId}`);
+            // }
+
+            // const arrayOfPromises = userIds.map(async (userId) => {
+            //     const response = await fetch(`${baseUrl}/users/${userId}`);
+            //     return response.json();
+            // });
+            // const user1 = await fetch(`${baseUrl}/users/1`);
+            // const user2 = await fetch(`${baseUrl}/users/2`);
+            // const user3 = await fetch(`${baseUrl}/users/3`);
+
+            // const users = await Promise.all(arrayOfPromises);
+            // return users;
+        }
+
+        fetchUsers().then(console.log)
+    </script>
 </body>
 
 </html>
